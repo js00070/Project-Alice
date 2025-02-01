@@ -13,17 +13,19 @@ set(TBB_EXAMPLES OFF)
 set(TBB_BENCH OFF)
 set(TBB_ENABLE_IPO ON)
 set(TBB_CPF OFF)
+set(TBB_STRICT OFF)
+set(TBB_NO_MMX ON)  # Disable MMX instructions
+set(TBB_PREFER_STATIC ON)  # Prefer static linking
 set(TBBMALLOC_BUILD ON)
 set(TBBMALLOC_PROXY_BUILD ON)
 set(TBB4PY_BUILD OFF)
 set(TBB_SIGNTOOL OFF)
 set(TBB_DYNAMIC_LOAD_ENABLED OFF)
 set(TBB_ENABLE_IPO OFF)
-set(TBB_STRICT OFF)
 
 FetchContent_Declare(tbb
 	GIT_REPOSITORY "https://github.com/oneapi-src/oneTBB"
-	GIT_TAG v2021.12.0
+	GIT_TAG v2021.5.0
 	GIT_SHALLOW 1
 	GIT_PROGRESS TRUE
 )
