@@ -140,6 +140,49 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
       }
+    },
+    {
+      "name": "macos-base",
+      "inherits": "base",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/toolchain_macos.cmake"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "x64-debug-macos",
+      "displayName": "x64 Debug (macOS)",
+      "inherits": "macos-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "x64-release-macos",
+      "displayName": "x64 Release (macOS)",
+      "inherits": "macos-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "x64-debug-macos",
+      "configurePreset": "x64-debug-macos",
+      "displayName": "x64 Debug (macOS)",
+      "description": "Build with Debug configuration on macOS"
+    },
+    {
+      "name": "x64-release-macos",
+      "configurePreset": "x64-release-macos",
+      "displayName": "x64 Release (macOS)",
+      "description": "Build with Release configuration on macOS"
     }
   ]
 }
