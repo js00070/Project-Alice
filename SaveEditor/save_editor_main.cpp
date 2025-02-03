@@ -1,6 +1,10 @@
 #define ALICE_NO_ENTRY_POINT 1
 #include "common_types.cpp"
+#ifdef _WIN64
 #include "simple_fs_win.cpp"
+#else
+#include "simple_fs_nix.cpp"
+#endif
 
 int main(int argc, char** argv) {
 	auto dir = simple_fs::get_or_create_oos_directory();
@@ -62,10 +66,10 @@ int main(int argc, char** argv) {
 
 							std::printf("<");
 							for(int32_t i = -8; i < 8; i++)
-								std::printf("%x ", p1[i]);
+								std::printf("%hhx ", static_cast<unsigned char>(p1[i]));
 							std::printf(">\n<");
 							for(int32_t i = -8; i < 8; i++)
-								std::printf("%x ", p2[i]);
+								std::printf("%hhx ", static_cast<unsigned char>(p2[i]));
 							std::printf(">\n");
 
 							match = false;

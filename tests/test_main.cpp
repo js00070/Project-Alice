@@ -7,7 +7,9 @@
 #define DCON_TRAP_INVALID_STORE 1
 #endif
 
+#ifdef _WIN64
 #pragma comment(lib, "icu.lib")
+#endif
 
 #define ALICE_NO_ENTRY_POINT 1
 #include "main.cpp"

@@ -210,7 +210,7 @@ using socket_t = SOCKET;
 #include <net/if.h>
 #include <netdb.h>
 #include <netinet/in.h>
-#ifdef __linux__
+#if defined(__linux__) || defined(__APPLE__)
 #include <resolv.h>
 #endif
 #include <netinet/tcp.h>

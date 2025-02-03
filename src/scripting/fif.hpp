@@ -1787,7 +1787,7 @@ inline type_span_gen_result internal_generate_type(std::string_view text, enviro
 	r.end_match_pos = mt_end;
 	if(r.max_variable == -1) {
 		std::vector<int32_t> type_subs;
-		auto resolved_type = resolve_span_type(std::span<int32_t const>(r.type_array.begin(), r.type_array.end()), type_subs, env);
+		auto resolved_type = resolve_span_type(std::span<int32_t const>(r.type_array.data(), r.type_array.size()), type_subs, env);
 		r.type_array.clear();
 		r.type_array.push_back(resolved_type.type);
 	}
@@ -8234,7 +8234,7 @@ inline int32_t* struct_definition(fif::state_stack&, int32_t* p, fif::environmen
 		extra_count = parse_int(next_token.content);
 	}
 
-	make_struct_type(name_token.content, std::span<int32_t const>{stack_types.begin(), stack_types.end()}, names, *e, max_variable + 1, extra_count);
+	make_struct_type(name_token.content, std::span<int32_t const>{stack_types.data(), stack_types.size()}, names, *e, max_variable + 1, extra_count);
 
 	return p + 2;
 }

@@ -3,6 +3,8 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <unicode/ucnv.h>   // For UConverter
+#include <unicode/unistr.h> // For icu::UnicodeString
 
 #include <codecvt>
 #include <locale>
@@ -529,16 +531,54 @@ directory get_or_create_scenario_directory() {
 	return directory(nullptr, path);
 }
 
+native_string win1250_to_utf8(std::string_view input)
+{
+    UErrorCode error = U_ZERO_ERROR;
+    // Create a converter for CP1250:
+    UConverter* converter = ucnv_open("windows-1250", &error);
+    if (!converter || U_FAILURE(error)) {
+        return "";
+    }
+
+    // Convert input to UChar (UTF-16 in ICU)
+    const char* source_start = input.data();
+    const char* source_end   = input.data() + input.size();
+    int32_t dest_capacity    = static_cast<int32_t>(input.size() * 2); // guess: up to 2x expansion
+    std::u16string utf16_string(dest_capacity, u'\0');
+
+    UChar* dest_start = reinterpret_cast<UChar*>(utf16_string.data());
+    UChar* dest_end   = dest_start + dest_capacity;
+
+    ucnv_toUnicode(
+        converter,
+        &dest_start,   // End pointer is updated
+        dest_end,
+        &source_start, // End pointer is updated
+        source_end,
+        nullptr,
+        true,
+        &error
+    );
+    ucnv_close(converter); // Done with this converter
+
+    if (U_FAILURE(error)) {
+        return "";
+    }
+
+    // The actual number of UChars written:
+    int32_t utf16_length = static_cast<int32_t>(dest_start - reinterpret_cast<UChar*>(utf16_string.data()));
+    utf16_string.resize(utf16_length);
+
+    // Now convert to UTF-8 using ICU's UnicodeString
+    icu::UnicodeString ustr(reinterpret_cast<const UChar*>(utf16_string.data()), utf16_length);
+    std::string utf8_result;
+    ustr.toUTF8String(utf8_result);
+
+    return utf8_result;
+}
+
 native_string win1250_to_native(std::string_view data_in) {
-	std::string result;
-	std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> converter;
-	for(auto ch : data_in) {
-		if(ch >= 0)
-			result += ch;
-		else
-			result += converter.to_bytes(text::win1250toUTF16(ch));
-	}
-	return result;
+	return win1250_to_utf8(data_in);
 }
 
 native_string utf8_to_native(std::string_view str) {

@@ -35,7 +35,7 @@
 #ifndef WIN32
 #include <sys/socket.h>         // place it before <net/if.h> struct sockaddr
 #endif //WIN32
-#ifdef __linux__
+#if defined(__linux__) || defined(__APPLE__)
 #define USE_NETLINK
 #include <linux/types.h>
 #include <linux/netlink.h>

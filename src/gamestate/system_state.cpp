@@ -40,6 +40,12 @@
 #include "fif_common.hpp"
 #include "gui_deserialize.hpp"
 
+// #if defined(__APPLE__)
+// #include <tbb/parallel_for.h>
+// #include <tbb/parallel_invoke.h>
+// namespace concurrency = tbb;
+// #endif
+
 namespace ui {
 
 void create_in_game_windows(sys::state& state) {

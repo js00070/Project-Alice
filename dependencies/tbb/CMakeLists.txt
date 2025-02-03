@@ -11,7 +11,6 @@ set(TBB_DISABLE_HWLOC_AUTOMATIC_SEARCH ON)
 set(TBB_TEST OFF)
 set(TBB_EXAMPLES OFF)
 set(TBB_BENCH OFF)
-set(TBB_ENABLE_IPO ON)
 set(TBB_CPF OFF)
 set(TBB_STRICT OFF)
 set(TBB_NO_MMX ON)  # Disable MMX instructions
@@ -56,6 +55,9 @@ if(WIN32)
 else() # GCC or CLANG
 	target_compile_options(tbb PRIVATE
 		$<$<CONFIG:Debug>:			-fexceptions>
-		$<$<NOT:$<CONFIG:Debug>>: 	-fexceptions>
-                -mwaitpkg)
+		$<$<NOT:$<CONFIG:Debug>>: 	-fexceptions>)
+	
+	if(NOT APPLE)  # Only add waitpkg on non-Apple platforms
+		target_compile_options(tbb PRIVATE -mwaitpkg)
+	endif()
 endif()

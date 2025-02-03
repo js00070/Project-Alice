@@ -82071,7 +82071,7 @@ MA_API ma_bool32 ma_dr_wav_fourcc_equal(const ma_uint8* a, const char* b)
     #pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
     #endif
 #endif
-#ifdef __linux__
+#if defined(__linux__) || defined(__APPLE__)
     #ifndef _BSD_SOURCE
         #define _BSD_SOURCE
     #endif

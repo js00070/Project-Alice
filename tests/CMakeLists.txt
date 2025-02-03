@@ -25,11 +25,19 @@ endif()
 # GENERATE test parsers
 
 # The command to build the generated testparsers file
+if(APPLE)
+add_custom_command(
+	OUTPUT ${PROJECT_SOURCE_DIR}/tests/test_parsers_generated.hpp
+	COMMAND ${PROJECT_SOURCE_DIR}/out/build/x64-debug-macos/ParserGenerator/ParserGenerator ${PROJECT_SOURCE_DIR}/tests/test_parsers.txt
+	DEPENDS ${PROJECT_SOURCE_DIR}/tests/test_parsers.txt
+	VERBATIM)
+else()
 add_custom_command(
 	OUTPUT ${PROJECT_SOURCE_DIR}/tests/test_parsers_generated.hpp
 	COMMAND ParserGenerator ${PROJECT_SOURCE_DIR}/tests/test_parsers.txt
 	DEPENDS ${PROJECT_SOURCE_DIR}/tests/test_parsers.txt
 	VERBATIM)
+endif()
 
 # Sets a dependency on the generated file
 add_custom_target(GENERATE_TEST_PARSERS DEPENDS ${PROJECT_SOURCE_DIR}/tests/test_parsers_generated.hpp)
