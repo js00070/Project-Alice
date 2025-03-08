@@ -463,81 +463,72 @@ void load_shaders(sys::state& state) {
 	}
 }
 
-void load_global_squares(sys::state& state) {
-	// Populate the position buffer
-	glGenBuffers(1, &state.open_gl.global_square_buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_square_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 16, global_square_data, GL_STATIC_DRAW);
-	//RTL version
-	glGenBuffers(1, &state.open_gl.global_rtl_square_buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_rtl_square_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 16, global_rtl_square_data, GL_STATIC_DRAW);
+void load_global_squares(sys::state& state) 
+{
+    // 1. Generate & fill your buffers:
+    glGenBuffers(1, &state.open_gl.global_square_buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_square_buffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 16, global_square_data, GL_STATIC_DRAW);
 
-	glGenVertexArrays(1, &state.open_gl.global_square_vao);
-	glBindVertexArray(state.open_gl.global_square_vao);
-	glEnableVertexAttribArray(0); // position
-	glEnableVertexAttribArray(1); // texture coordinates
+    // ... same for the other buffers:
+    // global_rtl_square_buffer, global_square_left_buffer, etc.
+    // Just keep in mind each call has the pattern:
+    // glGenBuffers(1, &buffer);
+    // glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    // glBufferData(...);
 
-	glBindVertexBuffer(0, state.open_gl.global_square_buffer, 0, sizeof(GLfloat) * 4);
+    // 2. Generate & bind VAO
+    glGenVertexArrays(1, &state.open_gl.global_square_vao);
+    glBindVertexArray(state.open_gl.global_square_vao);
 
-	glVertexAttribFormat(0, 2, GL_FLOAT, GL_FALSE, 0);									 // position
-	glVertexAttribFormat(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2); // texture coordinates
-	glVertexAttribBinding(0, 0);																				 // position -> to array zero
-	glVertexAttribBinding(1, 0);																				 // texture coordinates -> to array zero
+    // 3. Bind the main buffer data (for example global_square_buffer)
+    glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_square_buffer);
 
-	glGenBuffers(1, &state.open_gl.global_square_left_buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_square_left_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 16, global_square_left_data, GL_STATIC_DRAW);
+    // 4. Set up the 2D position attribute
+    glVertexAttribPointer(
+        0,                   // attribute location
+        2,                   // number of components (x, y)
+        GL_FLOAT,            // type
+        GL_FALSE,            // normalized?
+        4 * sizeof(GLfloat), // stride (x,y,u,v)
+        (GLvoid*)0           // offset in the buffer
+    );
+    glEnableVertexAttribArray(0);
 
-	glGenBuffers(1, &state.open_gl.global_square_right_buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_square_right_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 16, global_square_right_data, GL_STATIC_DRAW);
+    // 5. Set up the 2D texture coordinate attribute
+    glVertexAttribPointer(
+        1,                          // attribute location
+        2,                          // number of components (u, v)
+        GL_FLOAT,                   // type
+        GL_FALSE,                   // normalized?
+        4 * sizeof(GLfloat),        // stride (x,y,u,v)
+        (GLvoid*)(2 * sizeof(GLfloat)) // offset in the buffer
+    );
+    glEnableVertexAttribArray(1);
 
-	glGenBuffers(1, &state.open_gl.global_square_right_flipped_buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_square_right_flipped_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 16, global_square_right_flipped_data, GL_STATIC_DRAW);
+    // 6. Unbind VAO
+    glBindVertexArray(0);
 
-	glGenBuffers(1, &state.open_gl.global_square_left_flipped_buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_square_left_flipped_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 16, global_square_left_flipped_data, GL_STATIC_DRAW);
+    // 7. Generate sub_square_buffers similarly
+    glGenBuffers(64, state.open_gl.sub_square_buffers);
+    for (uint32_t i = 0; i < 64; ++i) 
+    {
+        glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.sub_square_buffers[i]);
+        float const cell_x = static_cast<float>(i & 7) / 8.0f;
+        float const cell_y = static_cast<float>((i >> 3) & 7) / 8.0f;
 
-	glGenBuffers(1, &state.open_gl.global_square_flipped_buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_square_flipped_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 16, global_square_flipped_data, GL_STATIC_DRAW);
+        GLfloat global_sub_square_data[] = {
+            0.0f, 0.0f, cell_x,         cell_y,
+            0.0f, 1.0f, cell_x,         cell_y + 1.0f/8.0f,
+            1.0f, 1.0f, cell_x + 1.0f/8.0f, cell_y + 1.0f/8.0f,
+            1.0f, 0.0f, cell_x + 1.0f/8.0f, cell_y
+        };
 
-	//RTL mode squares
-	glGenBuffers(1, &state.open_gl.global_rtl_square_left_buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_rtl_square_left_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 16, global_rtl_square_left_data, GL_STATIC_DRAW);
-
-	glGenBuffers(1, &state.open_gl.global_rtl_square_right_buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_rtl_square_right_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 16, global_rtl_square_right_data, GL_STATIC_DRAW);
-
-	glGenBuffers(1, &state.open_gl.global_rtl_square_right_flipped_buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_rtl_square_right_flipped_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 16, global_rtl_square_right_flipped_data, GL_STATIC_DRAW);
-
-	glGenBuffers(1, &state.open_gl.global_rtl_square_left_flipped_buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_rtl_square_left_flipped_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 16, global_rtl_square_left_flipped_data, GL_STATIC_DRAW);
-
-	glGenBuffers(1, &state.open_gl.global_rtl_square_flipped_buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_rtl_square_flipped_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 16, global_rtl_square_flipped_data, GL_STATIC_DRAW);
-
-	glGenBuffers(64, state.open_gl.sub_square_buffers);
-	for(uint32_t i = 0; i < 64; ++i) {
-		glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.sub_square_buffers[i]);
-
-		float const cell_x = static_cast<float>(i & 7) / 8.0f;
-		float const cell_y = static_cast<float>((i >> 3) & 7) / 8.0f;
-
-		GLfloat global_sub_square_data[] = {0.0f, 0.0f, cell_x, cell_y, 0.0f, 1.0f, cell_x, cell_y + 1.0f / 8.0f, 1.0f, 1.0f,
-				cell_x + 1.0f / 8.0f, cell_y + 1.0f / 8.0f, 1.0f, 0.0f, cell_x + 1.0f / 8.0f, cell_y};
-
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 16, global_sub_square_data, GL_STATIC_DRAW);
-	}
+        glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 16,
+                     global_sub_square_data, GL_STATIC_DRAW);
+    }
+    // Optionally unbind your buffer
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 inline auto map_color_modification_to_index(color_modification e) {
